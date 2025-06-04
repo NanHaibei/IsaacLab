@@ -22,6 +22,9 @@ from isaaclab.utils import replace_slices_with_strings, replace_strings_with_sli
 
 from isaaclab_tasks.utils.parse_cfg import load_cfg_from_registry
 
+from isaaclab_nhb import ISAACLAB_NHB_PATH
+import os
+from datetime import datetime
 
 def register_task_to_hydra(
     task_name: str, agent_cfg_entry_point: str
@@ -55,6 +58,11 @@ def register_task_to_hydra(
     cfg_dict = {"env": env_cfg_dict, "agent": agent_cfg_dict}
     # replace slices with strings because OmegaConf does not support slices
     cfg_dict = replace_slices_with_strings(cfg_dict)
+    # 修改outputs文件夹保存的位置
+    now = datetime.now()
+    formatted_time = now.strftime("%Y-%m-%d-%H:%M:%S")
+    outputs_dir = os.path.join(ISAACLAB_NHB_PATH, "logs", "hydra_outputs", task_name, formatted_time)
+    cfg_dict["hydra"]={"run":{"dir":outputs_dir}}
     # store the configuration to Hydra
     ConfigStore.instance().store(name=task_name, node=cfg_dict)
     return env_cfg, agent_cfg
